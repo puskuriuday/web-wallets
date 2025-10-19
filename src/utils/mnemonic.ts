@@ -1,12 +1,17 @@
 import { generateMnemonic, mnemonicToSeedSync } from "bip39";
-
+import { storeData } from "./localStore";
 
 
 const genmnemonic = () => {
     const mnemonic = generateMnemonic();
-    const seed = mnemonicToSeedSync(mnemonic);
-    localStorage.setItem("mnemonic", mnemonic);
+    const seed = getSeed(mnemonic);
+    storeData("mnemonic" , mnemonic);
     return { mnemonic, seed };
 }
 
-export { genmnemonic };
+const getSeed = (mnemonic: string) => {
+    return mnemonicToSeedSync(mnemonic);
+}
+
+
+export { genmnemonic , getSeed };
