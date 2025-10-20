@@ -8,7 +8,7 @@ const getData = (key: string): string | null => {
 }
 
 const removeData = (key: string) => {
-    localStorage.removeItem(key);
+    localStorage.setItem(key,'false');
 }
 
 export { storeData , getData , removeData };
