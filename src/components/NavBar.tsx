@@ -1,94 +1,92 @@
-import React, { useEffect, useState } from 'react';
-import { storeData, getData } from '../utils/localStore';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
-const NavBar: React.FC = () => {
-  const [darkMode, setDarkMode] = useState<boolean>(false);
+interface NavBarProps {
+  onLock: () => void;
+  chain: 'ethereum' | 'solana';
+  onChainChange: (chain: 'ethereum' | 'solana') => void;
+}
+
+const NavBar: React.FC<NavBarProps> = ({ onLock, chain, onChainChange }) => {
+  const location = useLocation();
 
   // Load stored theme on mount
-  useEffect(() => {
-    const storedTheme = getData('theme');
-    if (storedTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-      setDarkMode(true);
-    } else {
-      document.documentElement.classList.remove('dark');
-      setDarkMode(false);
-    }
-  }, []);
+  // Dark mode forced globally; no toggle action.
 
   // Toggle light/dark mode
-  const toggleTheme = () => {
-    const newMode = !darkMode;
-    setDarkMode(newMode);
-    if (newMode) {
-      document.documentElement.classList.add('dark');
-      storeData('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      storeData('theme', 'light');
-    }
-  };
+  // Theme permanently dark; no toggle.
+
+  const navLinks = [
+    { path: '/dashboard', label: 'Dashboard', icon: '📊' },
+    { path: '/receive', label: 'Receive', icon: '📥' },
+    { path: '/settings', label: 'Settings', icon: '⚙️' }
+  ];
 
   return (
-    <nav
-      className={`w-full shadow-md sticky top-0 z-50 backdrop-blur-sm transition-colors duration-300 ${
-        darkMode ? 'bg-gray-900/95 text-gray-100' : 'bg-white/95 text-gray-900'
-      }`}
-    >
-      <div className="flex justify-between items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-3">
-        {/* Left side — logo + title */}
-        <div className="flex items-center space-x-2">
-          <img
-            src={darkMode ? '/Dark.jpg' : '/Light.png'}
-            alt="UD-Wallets Logo"
-            className="h-7 w-7 sm:h-8 sm:w-8 transition-transform duration-300"
-          />
-          <span className="text-lg sm:text-xl font-semibold select-none">
-            UD-Wallets
-          </span>
+  <nav className="sticky top-0 flex items-center justify-between px-7 py-2.5 backdrop-blur-2xl bg-white/80 dark:bg-slate-950/75 border-b border-slate-200/60 dark:border-white/5 z-40 transition-colors">
+      <div className="flex items-center gap-8">
+        <Link to="/dashboard" className="flex items-center gap-2 text-lg font-bold bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-500 bg-clip-text text-transparent">
+          <img src="/favicon.svg" alt="UD" className="w-6 h-6" />
+          UD Wallets
+        </Link>
+        
+        <nav className="hidden md:flex items-center gap-2">
+          {navLinks.map((link) => (
+            <Link
+              key={link.path}
+              to={link.path}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                location.pathname === link.path
+                  ? 'bg-white/10 text-white'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <span className="mr-2">{link.icon}</span>
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+      </div>
+
+      <div className="flex items-center gap-3">
+        {/* Chain Selector */}
+        <div className="flex gap-2">
+          <button
+            data-chain="ethereum"
+            className={`px-3.5 py-2 rounded-full text-xs font-medium transition-all border ${
+              chain === 'ethereum'
+                ? 'bg-gradient-to-br from-slate-800 to-slate-900 dark:from-slate-800 dark:to-slate-900 light:from-slate-100 light:to-slate-200 text-slate-100 dark:text-slate-100 light:text-slate-900 border-white/10 dark:border-white/10 light:border-slate-300 shadow-lg'
+                : 'bg-slate-900 dark:bg-slate-900 light:bg-white text-slate-400 dark:text-slate-400 light:text-slate-600 border-white/8 dark:border-white/8 light:border-slate-200 hover:text-slate-100 dark:hover:text-slate-100 light:hover:text-slate-900'
+            }`}
+            onClick={() => onChainChange('ethereum')}
+          >
+            Ethereum
+          </button>
+          <button
+            data-chain="solana"
+            className={`px-3.5 py-2 rounded-full text-xs font-medium transition-all border ${
+              chain === 'solana'
+                ? 'bg-gradient-to-br from-slate-800 to-slate-900 dark:from-slate-800 dark:to-slate-900 light:from-slate-100 light:to-slate-200 text-slate-100 dark:text-slate-100 light:text-slate-900 border-white/10 dark:border-white/10 light:border-slate-300 shadow-lg'
+                : 'bg-slate-900 dark:bg-slate-900 light:bg-white text-slate-400 dark:text-slate-400 light:text-slate-600 border-white/8 dark:border-white/8 light:border-slate-200 hover:text-slate-100 dark:hover:text-slate-100 light:hover:text-slate-900'
+            }`}
+            onClick={() => onChainChange('solana')}
+          >
+            Solana
+          </button>
         </div>
 
-        {/* Right side — theme toggle */}
-        <button
-          onClick={toggleTheme}
-          className="relative flex items-center w-10 sm:w-12 h-6 bg-gray-300 dark:bg-gray-700 rounded-full transition-colors duration-300 focus:outline-none"
-          aria-label="Toggle Dark Mode"
+        {/* Theme Toggle */}
+        <div className="w-10 h-10 rounded-xl grid place-items-center text-lg bg-slate-900 text-slate-400 border border-white/10 select-none" title="Dark mode forced">
+          �
+        </div>
+
+        {/* Lock Button */}
+        <button 
+          onClick={onLock} 
+          className="w-10 h-10 rounded-xl grid place-items-center text-lg bg-slate-900 dark:bg-slate-900 light:bg-white text-slate-400 dark:text-slate-400 light:text-slate-600 border border-white/8 dark:border-white/8 light:border-slate-200 hover:text-slate-100 dark:hover:text-slate-100 light:hover:text-slate-900 hover:shadow-lg hover:shadow-slate-500/10 transition-all"
+          title="Lock"
         >
-          {/* Sun icon (light mode) */}
-          <svg
-            aria-hidden="true"
-            className={`absolute left-1 h-4 w-4 text-yellow-400 transition-opacity duration-300 ${
-              darkMode ? 'opacity-0' : 'opacity-100'
-            }`}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="12" r="3" />
-            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-          </svg>
-
-          {/* Moon icon (dark mode) */}
-          <svg
-            aria-hidden="true"
-            className={`absolute right-1 h-4 w-4 text-indigo-200 transition-opacity duration-300 ${
-              darkMode ? 'opacity-100' : 'opacity-0'
-            }`}
-            viewBox="0 0 24 24"
-            fill="currentColor"
-          >
-            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
-          </svg>
-
-          {/* Toggle circle */}
-          <span
-            className={`absolute left-1 top-1 w-4 h-4 rounded-full bg-white shadow-md transform transition-transform duration-300 ${
-              darkMode ? 'translate-x-4 sm:translate-x-6' : ''
-            }`}
-          />
+          🔒
         </button>
       </div>
     </nav>
